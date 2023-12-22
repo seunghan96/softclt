@@ -1,0 +1,9 @@
+data,tau_inst,tau_temp,bs
+HAR,20.0,1.0,4
+Epilepsy,40.0,2.0,16
+Wafer,1.0,0.5,4
+FordA,40.0,2.5,8
+FordB,30.0,1.5,4
+POC,1.0,1.0,16
+StarLightCurves,3.0,0.5,4
+ElectricDevices,40.0,2.5,8

@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from scipy.spatial.distance import euclidean
-from fastdtw import fastdtw
+# from fastdtw import fastdtw
 from tslearn.metrics import dtw, dtw_path,gak
 import tqdm
 
@@ -106,7 +106,6 @@ def get_EUC(MTS_tr):
     return euclidean_distances(MTS_tr)
 
 def save_sim_mat(X_tr, min_ = 0, max_ = 1, multivariate=False, type_='DTW'):
-    N = dist_mat.shape[0]
     if multivariate:
         assert type=='DTW'
         dist_mat = get_MDTW(X_tr)
@@ -121,6 +120,7 @@ def save_sim_mat(X_tr, min_ = 0, max_ = 1, multivariate=False, type_='DTW'):
             dist_mat = get_EUC(X_tr)
         elif type_=='GAK':
             dist_mat = get_GAK(X_tr)
+    N = dist_mat.shape[0]
         
     # (1) distance matrix
     diag_indices = np.diag_indices(N)

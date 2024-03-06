@@ -3,6 +3,7 @@ import sys
 import torch
 import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
+from models.soft_losses import *
 import numpy as np
 from models import TSEncoder
 from models.hard_losses import *
@@ -131,7 +132,8 @@ class TS2Vec:
                 out2_all = self._net(take_per_row(x, crop_offset + crop_left, crop_eright - crop_left))
                 out1 = out1_all[:, -crop_l:]
                 out2 = out2_all[:, :crop_l]
-                loss = hierarchical_contrastive_loss_soft(
+                # porblem
+                loss = hier_CL_soft(
                     out1,
                     out2,
                     soft_labels_batch,

@@ -89,7 +89,7 @@ if __name__ == '__main__':
         sys.exit(0)
     
     fix_seed(args.expid)
-    device = init_dl_program(args.gpu, seed=args.seed, max_threads=args.max_threads)
+    device = init_dl_program(args.gpu, seed=args.seed)#, max_threads=args.max_threads)
 
     print('Loading data... ', end='')
     if args.loader == 'UCR':

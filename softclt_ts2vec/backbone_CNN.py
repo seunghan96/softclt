@@ -8,6 +8,8 @@ from sklearn.metrics import roc_auc_score, average_precision_score, f1_score
 
 train_data = np.load(f'/home/r20user19/Documents/softclt/softclt_ts2vec/datasets/mimic/train_data.npy')
 train_label = np.genfromtxt(f'/home/r20user19/Documents/softclt/softclt_ts2vec/datasets/mimic/train_label.csv',delimiter=',')
+val_data = np.load(f'/home/r20user19/Documents/softclt/softclt_ts2vec/datasets/mimic/val_data.npy')
+val_label = np.genfromtxt(f'/home/r20user19/Documents/softclt/softclt_ts2vec/datasets/mimic/val_label.csv',delimiter=',')
 test_data = np.load(f'/home/r20user19/Documents/softclt/softclt_ts2vec/datasets/mimic/test_data.npy')
 test_label = np.genfromtxt(f'/home/r20user19/Documents/softclt/softclt_ts2vec/datasets/mimic/test_label.csv',delimiter=',')
 
@@ -24,9 +26,43 @@ class CustomDataset(Dataset):
     def __getitem__(self, idx):
         return self.data[idx], self.labels[idx]
 
+class EarlyStopping:
+    def __init__(self, patience=5, verbose=False, delta=0):
+        """
+        Args:
+            patience (int): How long to wait after last time validation loss improved.
+                            Default: 5
+            verbose (bool): If True, prints a message for each validation loss improvement. 
+                            Default: False
+            delta (float): Minimum change in the monitored quantity to qualify as an improvement.
+                            Default: 0
+        """
+        self.patience = patience
+        self.verbose = verbose
+        self.delta = delta
+        self.counter = 0
+        self.best_loss = None
+        self.early_stop = False
+
+    def __call__(self, val_loss):
+        if self.best_loss is None:
+            self.best_loss = val_loss
+        elif val_loss > self.best_loss - self.delta:
+            self.counter += 1
+            if self.verbose:
+                print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_loss = val_loss
+            self.counter = 0
+
 # Create dataset instances
 train_dataset = CustomDataset(train_data, train_label)
 test_dataset = CustomDataset(test_data, test_label)
+
+val_dataset = CustomDataset(val_data, val_label)
+val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
 # DataLoader instances
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
@@ -117,12 +153,24 @@ model = MultiChannelTimeSeriesCNN(num_channels=17, num_classes=2).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
+early_stopper = EarlyStopping(verbose=True)
+
 num_epochs = 10
 for epoch in range(num_epochs):
     train_loss = train_epoch(model, train_loader, criterion, optimizer, device)
-    print(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}")
-    test_loss, test_auroc, test_aupr, test_f1 = test(model, test_loader, criterion, device)
-    print(f"Test Loss: {test_loss:.4f}, Test AUROC: {test_auroc:.4f}, Test AUPR: {test_aupr:.4f}, Test F1 Score: {test_f1:.4f}")
+    val_loss, _, _, _ = test(model, val_loader, criterion, device)  # Reuse the test function for validation
+    
+    print(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+    
+    early_stopper(val_loss)
+    if early_stopper.early_stop:
+        print("Early stopping triggered.")
+        break
+# for epoch in range(num_epochs):
+#     train_loss = train_epoch(model, train_loader, criterion, optimizer, device)
+#     print(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}")
+#     # test_loss, test_auroc, test_aupr, test_f1 = test(model, test_loader, criterion, device)
+#     # print(f"Test Loss: {test_loss:.4f}, Test AUROC: {test_auroc:.4f}, Test AUPR: {test_aupr:.4f}, Test F1 Score: {test_f1:.4f}")
 
-# test_loss, test_auroc, test_aupr, test_f1 = test(model, test_loader, criterion, device)
-# print(f"Test Loss: {test_loss:.4f}, Test AUROC: {test_auroc:.4f}, Test AUPR: {test_aupr:.4f}, Test F1 Score: {test_f1:.4f}")
+test_loss, test_auroc, test_aupr, test_f1 = test(model, test_loader, criterion, device)
+print(f"Test Loss: {test_loss:.4f}, Test AUROC: {test_auroc:.4f}, Test AUPR: {test_aupr:.4f}, Test F1 Score: {test_f1:.4f}")

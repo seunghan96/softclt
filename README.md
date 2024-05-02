@@ -4,9 +4,12 @@
 
 <br>
 
-This repository contains the official implementation for the paper [Soft Contrastive Learning for Time Series](https://arxiv.org/abs/xxxxx) 
+This repository contains the official implementation for the paper [Soft Contrastive Learning for Time Series]([https://arxiv.org/abs/xxxxx](https://arxiv.org/abs/2312.16424)) 
 
-This work is accepted in [NeurIPS 2023 Workshop: Self-Supervised Learning - Theory and Practice](https://sslneurips23.github.io/).
+This work is accepted in 
+
+- [ICLR 2024](https://openreview.net/forum?id=pAsQSWlDUf)
+- [NeurIPS 2023 Workshop: Self-Supervised Learning - Theory and Practice](https://sslneurips23.github.io/).
 
 <br>
 

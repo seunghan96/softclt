@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 from models.timelags import *
+from models.hard_losses import *
 
 ########################################################################################################
 ## 1. Soft Contrastive Losses
